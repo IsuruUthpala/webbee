@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { MenuItem } from './entities/menu-item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { getTreeRepository, Repository } from 'typeorm';
+import { AppDataSource } from '../config/typeorm.config-migrations';
 
 @Injectable()
 export class MenuItemsService {
@@ -84,6 +85,6 @@ export class MenuItemsService {
     ]
   */
   async getMenuItems() {
-    throw new Error('TODO in task 3');
+    return await AppDataSource.manager.getTreeRepository(MenuItem).findTrees();
   }
 }

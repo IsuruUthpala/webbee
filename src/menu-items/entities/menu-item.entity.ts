@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  TreeChildren,
+  TreeParent,
+} from 'typeorm';
 
 @Entity()
 export class MenuItem {
@@ -11,9 +17,17 @@ export class MenuItem {
   @Column()
   url: string;
 
-  @Column({ type: 'integer', default: null })
-  parentId: number;
+  // @Column({ type: 'integer', default: null })
+  // parentId: number;
+
+  @TreeParent()
+  parent: MenuItem;
 
   @Column({ type: 'datetime' })
   createdAt: string;
+
+  @TreeChildren()
+  children: MenuItem[];
+
+  // didn't generate any migrations just proving concept
 }
