@@ -2,12 +2,15 @@ import { Repository } from 'typeorm';
 import { Get, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from './entities/event.entity';
+import { Workshop } from './entities/workshop.entity';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventRepository: Repository<Event>,
+    @InjectRepository(Event)
+    private workshopRepository: Repository<Workshop>,
   ) {}
 
   getWarmupEvents() {
@@ -92,7 +95,10 @@ export class EventsService {
 
   @Get('events')
   async getEventsWithWorkshops() {
-    throw new Error('TODO task 1');
+    const qb = this.workshopRepository
+      .createQueryBuilder('ws')
+      .innerJoinAndSelect('events', 'ev', 'ws.eventId=ev.id');
+    return await qb.getRawMany();
   }
 
   /*
