@@ -97,7 +97,7 @@ export class EventsService {
   async getEventsWithWorkshops() {
     const qb = this.workshopRepository
       .createQueryBuilder('ws')
-      .innerJoinAndSelect('events', 'ev', 'ws.eventId=ev.id');
+      .innerJoinAndSelect('event', 'ev', 'ws.eventId=ev.id');
     return await qb.getRawMany();
   }
 
@@ -168,6 +168,13 @@ export class EventsService {
      */
   @Get('futureevents')
   async getFutureEventWithWorkshops() {
-    throw new Error('TODO task 2');
+    const today = new Date();
+    const qb = this.workshopRepository
+      .createQueryBuilder('ws')
+      .innerJoinAndSelect('event', 'ev', 'ws.eventId=ev.id');
+    qb.andWhere('date(ws.start) >= :startDate', {
+      startDate: today,
+    });
+    return await qb.getRawMany();
   }
 }
