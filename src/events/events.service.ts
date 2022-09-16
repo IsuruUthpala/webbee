@@ -1,15 +1,14 @@
-import { Repository } from 'typeorm';
+import { Repository, QueryRunner } from 'typeorm';
 import { Get, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from './entities/event.entity';
 import { Workshop } from './entities/workshop.entity';
-
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventRepository: Repository<Event>,
-    @InjectRepository(Event)
+    @InjectRepository(Workshop)
     private workshopRepository: Repository<Workshop>,
   ) {}
 
@@ -95,11 +94,15 @@ export class EventsService {
 
   @Get('events')
   async getEventsWithWorkshops() {
-    const qb = this.workshopRepository
-      .createQueryBuilder('ws')
-      .innerJoinAndSelect('event', 'ev', 'ws.eventId=ev.id');
-    return await qb.getRawMany();
-  }
+    const events = await this.eventRepository.find();
+    const workshops = await this.workshopRepository.find();
+
+    return events.map((ev) => {
+      return Object.assign({}, ev, {
+        workshops: workshops.filter((ws) => ws.eventId === ev.id),
+      });
+    });
+  } // getEventsWithWorkshops
 
   /*
     Requirements:
@@ -169,12 +172,13 @@ export class EventsService {
   @Get('futureevents')
   async getFutureEventWithWorkshops() {
     const today = new Date();
-    const qb = this.workshopRepository
-      .createQueryBuilder('ws')
-      .innerJoinAndSelect('event', 'ev', 'ws.eventId=ev.id');
-    qb.andWhere('date(ws.start) >= :startDate', {
-      startDate: today,
-    });
-    return await qb.getRawMany();
+    return await this.eventRepository
+      .createQueryBuilder('ev')
+      .leftJoinAndMapMany('ev.Workshops', Workshop, 'ws', 'ws.eventId =ev.id')
+      .where('date(ws.start) >= :startDate', {
+        startDate: today,
+      })
+      .orderBy('ws.id')
+      .getMany();
   }
 }
