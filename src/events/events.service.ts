@@ -174,7 +174,7 @@ export class EventsService {
     const today = new Date();
     return await this.eventRepository
       .createQueryBuilder('ev')
-      .leftJoinAndMapMany('ev.Workshops', Workshop, 'ws', 'ws.eventId =ev.id')
+      .leftJoinAndMapMany('ev.workshops', Workshop, 'ws', 'ws.eventId =ev.id')
       .where('date(ws.start) >= :startDate', {
         startDate: today,
       })
